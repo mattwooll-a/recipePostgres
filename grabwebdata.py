@@ -96,28 +96,29 @@ def extract_description(rec_div):
 
     return " ".join(texts)
 
+def pullfromurl(url):
+    headers = {
+        "User-Agent": "personalrecipecontainer/0.1 (contact: mattwooll.a@gmail.com)"
+    }
+    response = requests.get(url, headers=headers, timeout=10)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    rec_div = soup.find("div", class_="wprm-entry-content")
+    cal_div = soup.find("div", class_="wprm-entry-nutrition")
+    name = url.split("/")[-1]
 
-url = "https://www.recipetineats.com/oven-baked-barbecue-pork-ribs/"
-headers = {
-    "User-Agent": "personalrecipecontainer/0.1 (contact: mattwooll.a@gmail.com)"
-}
-response = requests.get(url, headers=headers, timeout=10)
-response.raise_for_status()
-soup = BeautifulSoup(response.text, "html.parser")
-rec_div = soup.find("div", class_="wprm-entry-content")
-cal_div = soup.find("div", class_="wprm-entry-nutrition")
-
-recipe = {
-    "title": soup.find("h1").get_text(strip=True),
-    "description": extract_description(rec_div),
-    "ingredients": parse_ingredients(rec_div),
-    "instructions": parse_instructions(rec_div),
-    "nutrition": parse_nutrition(cal_div),
-    "source_url": url
-}
-
-
-with open("barbecue_pork_ribs.json", "w", encoding="utf-8") as f:
-    json.dump(recipe, f, indent=2, ensure_ascii=False)
+    recipe = {
+        "title": soup.find("h1").get_text(strip=True),
+        "description": extract_description(rec_div),
+        "ingredients": parse_ingredients(rec_div),
+        "instructions": parse_instructions(rec_div),
+        "nutrition": parse_nutrition(cal_div),
+        "source_url": url
+    }
 
 
+    with open((name + ".json"), "w", encoding="utf-8") as f:
+        json.dump(recipe, f, indent=2, ensure_ascii=False)
+
+
+pullfromurl('https://www.recipetineats.com/oven-baked-barbecue-pork-ribs')
