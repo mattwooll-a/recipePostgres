@@ -24,25 +24,33 @@ def parse_ingredients(content_div):
 
     for el in content_div.find_all(["h3", "li"]):
         if el.name == "h3":
-            current_section = clean_text(el)
-            ingredients[current_section] = []
+            heading = clean_text(el)
+
+            # Only allow ingredient sections
+            if "ingredient" in heading.lower():
+                current_section = heading
+                ingredients[current_section] = []
+            else:
+                current_section = None
+
         elif el.name == "li" and current_section:
-            raw = clean_text(el)
-            ingredients[current_section].append(sanitize_ingredient(raw))
+            ingredients[current_section].append(
+                sanitize_ingredient(clean_text(el))
+            )
 
     return ingredients
 
+
 def parse_instructions(content_div):
     instructions = []
-    instruction_header = content_div.find(lambda tag: tag.name in ["h2", "h3"] and "Instruction" in tag.text)
+    in_instructions = False
 
-    if not instruction_header:
-        return instructions
+    for el in content_div.find_all(["h3", "li"]):
+        if el.name == "h3":
+            heading = clean_text(el).lower()
+            in_instructions = "instruction" in heading
 
-    for el in instruction_header.find_next_siblings():
-        if el.name in ["h2", "h3"]:
-            break
-        if el.name == "li":
+        elif el.name == "li" and in_instructions:
             instructions.append(clean_text(el))
 
     return instructions
@@ -117,8 +125,8 @@ def pullfromurl(url):
     }
 
 
-    #with open((name + ".json"), "w", encoding="utf-8") as f:
-    #    json.dump(recipe, f, indent=2, ensure_ascii=False)
+    with open((name + ".json"), "w", encoding="utf-8") as f:
+        json.dump(recipe, f, indent=2, ensure_ascii=False)
     return recipe
 
 def try_scrape_recipe(url):
@@ -133,4 +141,4 @@ def try_scrape_recipe(url):
         print(f"[FAIL] {url} -> {e}")
         return None
 
-#pullfromurl('https://www.recipetineats.com/oven-baked-barbecue-pork-ribs')
+pullfromurl('https://www.recipetineats.com/oven-baked-barbecue-pork-ribs')

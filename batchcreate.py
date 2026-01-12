@@ -4,6 +4,7 @@ from grabwebdata import try_scrape_recipe
 from pathlib import Path 
 import time
 import json
+import random
 def fetch_sitemap_urls(sitemap_url):
     headers = {
         "User-Agent": "EducationalScraper/1.0"
@@ -43,7 +44,6 @@ def crawl_sitemap(urls, out_dir="recipes"):
             else:
                 print(f"  ↷ Skipped")
 
-            time.sleep(2)  # rate limiting (important)
+            time.sleep(random.randint(3,5) + random.random())  # rate limiting (important)
 urls = fetch_sitemap_urls("https://www.recipetineats.com/post-sitemap.xml")
-print(urls)
 crawl_sitemap(urls)
