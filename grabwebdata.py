@@ -117,8 +117,20 @@ def pullfromurl(url):
     }
 
 
-    with open((name + ".json"), "w", encoding="utf-8") as f:
-        json.dump(recipe, f, indent=2, ensure_ascii=False)
+    #with open((name + ".json"), "w", encoding="utf-8") as f:
+    #    json.dump(recipe, f, indent=2, ensure_ascii=False)
+    return recipe
 
+def try_scrape_recipe(url):
+    try:
+        recipe = pullfromurl(url)
+        if not recipe:
+            return None
+        if not recipe.get("ingredients"):
+            return None
+        return recipe
+    except Exception as e:
+        print(f"[FAIL] {url} -> {e}")
+        return None
 
-pullfromurl('https://www.recipetineats.com/oven-baked-barbecue-pork-ribs')
+#pullfromurl('https://www.recipetineats.com/oven-baked-barbecue-pork-ribs')
