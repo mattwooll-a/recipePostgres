@@ -1,6 +1,101 @@
 import requests
 from bs4 import BeautifulSoup
 import time
+import json
+import re
+
+def clean_text(el):
+    if el is None:
+        return ""
+    return el.get_text(separator=" ", strip=True)
+
+def sanitize_ingredient(text):
+    if not text:
+        return ""
+    text = re.sub(r"[▢▪•◦◆■]", "", text)
+    text = re.sub(r"[^a-zA-Z0-9\s\.\,\-\(\)\/]", "", text)
+    text = re.sub(r"\s+", " ", text)
+
+    return text.strip()
+
+def parse_ingredients(content_div):
+    ingredients = {}
+    current_section = None
+
+    for el in content_div.find_all(["h3", "li"]):
+        if el.name == "h3":
+            current_section = clean_text(el)
+            ingredients[current_section] = []
+        elif el.name == "li" and current_section:
+            raw = clean_text(el)
+            ingredients[current_section].append(sanitize_ingredient(raw))
+
+    return ingredients
+
+def parse_instructions(content_div):
+    instructions = []
+    instruction_header = content_div.find(lambda tag: tag.name in ["h2", "h3"] and "Instruction" in tag.text)
+
+    if not instruction_header:
+        return instructions
+
+    for el in instruction_header.find_next_siblings():
+        if el.name in ["h2", "h3"]:
+            break
+        if el.name == "li":
+            instructions.append(clean_text(el))
+
+    return instructions
+
+def parse_nutrition(nutrition_div):
+    nutrition = {}
+
+    containers = nutrition_div.find_all(
+        "span",
+        class_=lambda c: c and "wprm-nutrition-label-text-nutrition-container" in c
+    )
+
+    for c in containers:
+        label_el = c.find("span", class_="wprm-nutrition-label-text-nutrition-label")
+        value_el = c.find("span", class_="wprm-nutrition-label-text-nutrition-value")
+        unit_el  = c.find("span", class_="wprm-nutrition-label-text-nutrition-unit")
+        daily_el = c.find("span", class_="wprm-nutrition-label-text-nutrition-daily")
+
+        if not label_el or not value_el:
+            continue
+
+        key = label_el.get_text(strip=True).replace(":", "").lower()
+        value = value_el.get_text(strip=True)
+        unit = unit_el.get_text(strip=True) if unit_el else ""
+        daily = daily_el.get_text(strip=True) if daily_el else ""
+
+        nutrition[key] = {
+            "value": value,
+            "unit": unit,
+            "daily": daily
+        }
+        key = re.sub(r"\s+", "_", key)
+        nutrition_flat = {
+            k: f"{v['value']}{v['unit']} {v['daily']}".strip()
+            for k, v in nutrition.items()
+        }
+
+    return nutrition_flat
+
+
+def extract_description(rec_div):
+    texts = []
+
+    for el in rec_div.find_all(["p", "div"], recursive=False):
+        txt = clean_text(el)
+        if not txt:
+            continue
+        if "ingredient" in txt.lower():
+            break
+        texts.append(txt)
+
+    return " ".join(texts)
+
 
 url = "https://www.recipetineats.com/oven-baked-barbecue-pork-ribs/"
 headers = {
@@ -11,18 +106,18 @@ response.raise_for_status()
 soup = BeautifulSoup(response.text, "html.parser")
 rec_div = soup.find("div", class_="wprm-entry-content")
 cal_div = soup.find("div", class_="wprm-entry-nutrition")
-if not rec_div:
-    print("Content not found")
-else:
-    text = rec_div.get_text(separator="\n", strip=True)
-    print(text)
 
-if not cal_div:
-    print("Content not found")
-else:
-    text = cal_div.get_text(separator="\n", strip=True)
-    print(text)
+recipe = {
+    "title": soup.find("h1").get_text(strip=True),
+    "description": extract_description(rec_div),
+    "ingredients": parse_ingredients(rec_div),
+    "instructions": parse_instructions(rec_div),
+    "nutrition": parse_nutrition(cal_div),
+    "source_url": url
+}
 
 
+with open("barbecue_pork_ribs.json", "w", encoding="utf-8") as f:
+    json.dump(recipe, f, indent=2, ensure_ascii=False)
 
 
