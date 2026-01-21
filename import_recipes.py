@@ -317,19 +317,18 @@ if __name__ == "__main__":
     
     # Import recipes
     print(f"\nStarting import from: {recipes_dir}")
-    #success_count, failed = import_recipes_from_directory(recipes_dir, auto_tag=True)
-    import_single_recipe("oven-baked-barbecue-pork-ribs.json", auto_tag=True)
+    success_count, failed = import_recipes_from_directory(recipes_dir, auto_tag=True)
+    #import_single_recipe("oven-baked-barbecue-pork-ribs.json", auto_tag=True)
     print("done")
-    # Show stats
-    #if success_count > 0:
-    #    show_import_stats()
-        
-    #     print("\n" + "="*70)
-    #     print("NEXT STEPS:")
-    #     print("="*70)
-    #     print("1. View your recipes in Supabase Table Editor")
-    #     print("2. Query by protein: SELECT * FROM recipe_tags_view WHERE 'chicken' = ANY(proteins);")
-    #     print("3. Search ingredients: See example_queries.sql")
-    #     print("="*70)
-    
-    # print("\n✓ Import complete!")
+    #Show stats
+    if success_count > 0:
+        show_import_stats()
+        print("\n" + "="*70)
+        print("NEXT STEPS:")
+        print("="*70)
+        print("1. View your recipes in Supabase Table Editor")
+        print("2. Query by protein: SELECT * FROM recipe_tags_view WHERE 'chicken' = ANY(proteins);")
+        print("3. Search ingredients: See example_queries.sql")
+        print("="*70)
+
+    print("\n✓ Import complete!")

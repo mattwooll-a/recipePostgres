@@ -71,6 +71,7 @@ def create_schema():
         fat TEXT,
         fiber TEXT,
         saturated_fat TEXT,
+        trans_fat TEXT,
         polyunsaturated_fat TEXT,
         cholesterol TEXT,
         sodium TEXT,
