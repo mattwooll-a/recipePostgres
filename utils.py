@@ -119,7 +119,7 @@ def parse_ingredient_advanced(ingredient_text):
     """
     try:
         parsed = parse_ingredient(ingredient_text)
-        if parsed.name[0].confidence > 0.6:
+        if parsed.name[0].confidence > 0.4:
             result = {
                 'name': parsed.name[0].text if parsed.name else '',
                 'quantity': parsed.amount[0].quantity if parsed.amount else None,
@@ -130,7 +130,7 @@ def parse_ingredient_advanced(ingredient_text):
             }
             return result
         else:
-            raise ValueError("low conf")
+            raise ValueError("low conf" + parsed.name[0].confidence)
         
     except Exception as e:
         print(f"Parse failed for '{ingredient_text}': {e}")
@@ -155,11 +155,12 @@ def fallback_parse(ingredient_text):
 INGREDIENT_CATEGORIES = {
     'proteins': ['pork', 'chicken', 'beef', 'lamb', 'fish', 'salmon', 'tuna', 
                  'shrimp', 'prawns', 'tofu', 'eggs', 'turkey'],
-    'vegetables': ['zucchini', 'capsicum', 'pepper', 'onion', 'garlic', 'tomato',
+    'vegetables': ['zucchini', 'capsicum', 'onion', 'tomato',
                    'carrot', 'broccoli', 'spinach', 'lettuce', 'mushroom'],
     'grains': ['couscous', 'rice', 'pasta', 'quinoa', 'bread', 'flour'],
     'dairy': ['cheese', 'feta', 'milk', 'butter', 'cream', 'yogurt'],
-    'herbs': ['mint', 'basil', 'parsley', 'cilantro', 'thyme', 'rosemary']
+    'herbs': ['mint', 'basil', 'parsley', 'cilantro', 'thyme', 'rosemary'],
+    'spices':['salt','pepper','chilli','garlic','powder','cumin','cinnamon','star','paprika','marsala']
 }
 
 def categorize_ingredient(ingredient_name):

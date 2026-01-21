@@ -1,5 +1,4 @@
-from utils import parse_ingredient_advanced
-
+from utils import *
 if __name__ == "__main__":
     # Test parsing
     test_ingredients = [
@@ -16,4 +15,11 @@ if __name__ == "__main__":
     
     for ing in test_ingredients:
         parsed = parse_ingredient_advanced(ing)
-        print(parsed)
+        category = categorize_ingredient(parsed['name'])        
+        print(f"\nOriginal: {ing}")
+        print(f"  Name: {parsed['name']}")
+        print(f"  Quantity: {parsed['quantity']}")
+        print(f"  Unit: {parsed['unit']}")
+        print(f"  Preparation: {parsed['preparation']}")
+        print(f"  Category: {category}")
+        print(f"  ✓ Valid: {parsed['parsed_successfully']}")
